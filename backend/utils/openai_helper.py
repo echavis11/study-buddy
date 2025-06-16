@@ -1,11 +1,10 @@
 import PyPDF2
+import os
+import json
 from openai import OpenAI
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
-api_key = os.getenv("OPENAI_API_KEY")
-
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def extract_text_from_pdf(file):
@@ -26,16 +25,10 @@ def generate_flashcards(text):
         messages=[{"role": "user", "content": prompt}],
         temperature=0.3,
     )
-    content = response.choices[0].message.content
 
-    # Parse JSON from response
-    import json
     try:
-        content = response.choices[0].message.content
-        flashcards = json.loads(content)
+        flashcards = json.loads(response.choices[0].message.content)
         return flashcards
     except Exception as e:
         print("Failed to parse OpenAI response:", e)
         return []
-
-            

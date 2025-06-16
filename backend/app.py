@@ -1,21 +1,32 @@
-from flask import Flask, jsonify, request
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_cors import CORS
-from services.flashcardGenerator import extract_text_from_pdf, generate_flashcards
+from config import Config
+from flask_jwt_extended import JWTManager
 
+db = SQLAlchemy()
+migrate = Migrate()
+jwt = JWTManager()
 
-app = Flask(__name__)
-CORS(app)
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
-@app.route('/api/generate', methods=['POST'])
-def generate():
-    if 'pdf' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
+    db.init_app(app)
+    migrate.init_app(app, db)
+    jwt.init_app(app)
+    CORS(app)
 
-    pdf_file = request.files['pdf']
-    text = extract_text_from_pdf(pdf_file)
-    flashcards = generate_flashcards(text)
+    from routes.flashcard_routes import flashcard_bp
+    from routes.auth_routes import auth_bp
+    
+    app.register_blueprint(flashcard_bp, url_prefix="/api")
+    app.register_blueprint(auth_bp, url_prefix="/auth")
 
-    return jsonify({'flashcards': flashcards})
+    return app
 
-if __name__ == '__main__':
+app = create_app()
+
+if __name__ == "__main__":
     app.run(debug=True)
