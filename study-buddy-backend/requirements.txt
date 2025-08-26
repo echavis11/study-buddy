@@ -1,0 +1,7 @@
+flask==3.0.3
+flask-sqlalchemy==3.1.1
+sqlalchemy==2.0.32
+openai==1.40.6
+python-dotenv==1.0.1
+gunicorn==23.0.0   # WSGI server
+alembic==1.13.2    # migrations for SQLAlchemy
